@@ -7,9 +7,31 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
+    // Verificar se o caminho para o CSV foi fornecido como argumento
+    if (argc < 2) {
+        cerr << "Uso: " << argv[0] << " -csv <caminho_para_csv>" << endl;
+        return 1;
+    }
+
+    string csv_path;
+
+    // Processar argumentos
+    for (int i = 1; i < argc; ++i) {
+        string arg = argv[i];
+        if (arg == "-csv" && i + 1 < argc) {
+            csv_path = argv[i + 1];
+        }
+    }
+
+    // Verificar se o caminho do CSV foi atribuído
+    if (csv_path.empty()) {
+        cerr << "Erro: O caminho para o CSV nao foi especificado." << endl;
+        return 1;
+    }
+
     // Ler o arquivo CSV
-    Reader reader("datasets/random.csv");
+    Reader reader(csv_path);
     if (!reader.readCSV()) {
         cerr << "Erro ao ler o arquivo CSV." << endl;
         return 1;
