@@ -1,9 +1,9 @@
 OS := $(shell uname)
 CXX = clang++
-CXXFLAGS = -std=c++17 -Iinclude -Wall -Wextra -Werror
-CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
-CXXFLAGS += -Wno-unused-private-field
-CXXFLAGS += -stdlib=libc++ -I/usr/include/c++/v1
+CXXFLAGS = -std=c++17 -Iinclude -Wall -Wextra -Werror \
+           -Wno-unused-variable -Wno-unused-parameter \
+           -Wno-unused-private-field \
+           -stdlib=libc++ -I/usr/include/c++/v1
 SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build/bin
@@ -52,7 +52,7 @@ clean: clean_obj clean_bin
 run: clean_all build clean_obj
 	@ $(TARGET) -csv $(CSV_PATH)
 
-.PHONY: all build clean_obj clean_bin clean_all run
-
 exec:
 	@ $(MAKE) run CSV_PATH=$(CSV)
+
+.PHONY: all build clean_obj clean_bin clean_all run exec
