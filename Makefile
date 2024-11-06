@@ -3,11 +3,15 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -Iinclude -Wall -Wextra -Werror \
            -Wno-unused-variable -Wno-unused-parameter \
            -Wno-unused-private-field \
-           -stdlib=libc++ -I/usr/include/c++/v1 -fopenmp
+           -stdlib=libc++ -I/usr/include/c++/v1
 SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build/bin
 CSV_PATH = 
+
+ifeq ($(MAKECMDGOALS), omp)
+	CXXFLAGS += -DOMP -fopenmp
+endif
 
 SRCS = $(wildcard $(SRC_DIR)/*.cpp) main.cpp 
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
@@ -25,6 +29,8 @@ endif
 all: build
 
 re: clean all
+
+omp: re
 
 build: $(BIN_DIR) $(OBJ_DIR) $(TARGET)
 
@@ -59,4 +65,4 @@ run: clean_all build clean_obj
 exec:
 	@ $(MAKE) run CSV_PATH=$(CSV)
 
-.PHONY: all build clean_obj clean_bin clean_all run exec re
+.PHONY: all build clean_obj clean_bin clean_all run exec re omp

@@ -2,7 +2,10 @@
 #include <algorithm>
 #include <random>
 #include <map>
+
+#ifdef OMP
 #include <omp.h>
+#endif
 
 /*
 
@@ -37,9 +40,11 @@ void randomForest::train(float_matrix &X_train, float_vector &y_train){
     int n_features = X_train[0].size();
     int n_samples = X_train.size();
 
+    #ifdef OMP
     omp_set_num_threads(num_trees);
 
-    #pragma omp parallel for 
+    #pragma omp parallel for schedule(dynamic)
+    #endif
     for (int i = 0; i < num_trees; i++)
     {
         //sortear x valores do treino
@@ -50,8 +55,8 @@ void randomForest::train(float_matrix &X_train, float_vector &y_train){
         }
         shuffle(random_indexes.begin(), random_indexes.end(), default_random_engine(random_device{}()));
 
-        std::random_device rd;                          // Usado para gerar uma semente
-        std::mt19937 generator(rd());                   // Gerador de Mersenne Twister
+        std::random_device rd;                                   // Usado para gerar uma semente
+        std::mt19937 generator(rd());                            // Gerador de Mersenne Twister
         std::uniform_int_distribution<int> distribution(1, 100); // Intervalo de 1 a 100
 
         // Gerar um número aleatório
