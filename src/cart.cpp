@@ -3,6 +3,7 @@
 #include <limits>
 #include <numeric>
 #include <unordered_map>
+#include <iostream>
 
 using namespace std;
 
@@ -39,7 +40,6 @@ Node *Cart::split_node(const float_matrix &X, const float_vector &y, const int d
 
     // Best division
     auto [feature, threshold] = best_threshold(X, y);
-
     // Divide data
     auto [X_left, y_left, X_right, y_right] = divide(X, y, feature, threshold);
 
@@ -165,3 +165,4 @@ float Cart::predict_single(const std::vector<float>& sample, Node* node) {
         return predict_single(sample, node->right);
     }
 }
+

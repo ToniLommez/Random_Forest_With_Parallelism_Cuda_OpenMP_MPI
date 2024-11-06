@@ -7,7 +7,6 @@ CXXFLAGS += -stdlib=libc++ -I/usr/include/c++/v1
 SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build/bin
-TARGET = $(BIN_DIR)/random_forest.exe
 CSV_PATH = 
 
 SRCS = $(wildcard $(SRC_DIR)/*.cpp) main.cpp 
@@ -16,13 +15,16 @@ OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 ifeq ($(OS), Windows_NT)
 	RM = powershell -Command "Remove-Item -Recurse -Force"
 	MKDIR = mkdir
+	TARGET = $(BIN_DIR)/main.exe
 else
 	RM = rm -rf
 	MKDIR = mkdir -p
-	TARGET = $(BIN_DIR)/random_forest
+	TARGET = $(BIN_DIR)/main
 endif
 
 all: build
+
+re: clean all
 
 build: $(BIN_DIR) $(OBJ_DIR) $(TARGET)
 
@@ -52,7 +54,7 @@ clean: clean_obj clean_bin
 run: clean_all build clean_obj
 	@ $(TARGET) -csv $(CSV_PATH)
 
-.PHONY: all build clean_obj clean_bin clean_all run
+.PHONY: all build clean_obj clean_bin clean_all run re
 
 exec:
 	@ $(MAKE) run CSV_PATH=$(CSV)

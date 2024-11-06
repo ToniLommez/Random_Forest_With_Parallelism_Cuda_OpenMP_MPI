@@ -5,4 +5,4 @@ Implementation of a Random Forest Algorithm based on CART, optimized with OpenMP
 
 make - compile the program with clang++
 make exec CSV=path/to/csvFile.csv
-make clean - clean the output(all files inside build directory)
+make clean - clean the output(all files inside build directory) 

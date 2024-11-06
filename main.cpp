@@ -2,12 +2,13 @@
 #include <chrono>
 #include <random>
 #include "include/utils.hpp"
-#include "include/cart.hpp"
+#include "include/randomForest.hpp"
 #include "include/reader.hpp"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
+
     // Verificar se o caminho para o CSV foi fornecido como argumento
     if (argc < 2) {
         cerr << "Uso: " << argv[0] << " -csv <caminho_para_csv>" << endl;
@@ -50,11 +51,11 @@ int main(int argc, char* argv[]) {
     trainTestSplit(X, y, X_train, y_train, X_test, y_test, distribution(rng), 0.3f);
 
     // Criar e Treinar a Árvore
-    Cart cart;
-    cart.fit(X_train, y_train);
+    randomForest rf(10);
+    rf.train(X_train, y_train);
 
     // Fazer predições no conjunto de teste
-    float_vector y_pred = cart.predict(X_test);
+    float_vector y_pred = rf.predict(X_test);
 
     // Calcular a Acurácia
     float accuracy = calculateAccuracy(y_test, y_pred);
