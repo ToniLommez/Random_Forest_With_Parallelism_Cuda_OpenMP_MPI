@@ -3,7 +3,7 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -Iinclude -Wall -Wextra -Werror \
            -Wno-unused-variable -Wno-unused-parameter \
            -Wno-unused-private-field \
-           -stdlib=libc++ -I/usr/include/c++/v1
+           -stdlib=libc++ -I/usr/include/c++/v1 -fopenmp
 SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build/bin

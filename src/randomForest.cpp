@@ -1,7 +1,8 @@
-#include "randomForest.hpp"
+#include "../include/randomForest.hpp"
 #include <algorithm>
 #include <random>
 #include <map>
+#include <omp.h>
 
 /*
 
@@ -24,10 +25,8 @@ cada árvore, guardar as features utilizadas
 
 randomForest::randomForest(int n)
 {
-
     num_trees = n;
     forest.resize(n);
-
 }
 
 randomForest::~randomForest()
@@ -35,10 +34,12 @@ randomForest::~randomForest()
 }
 
 void randomForest::train(float_matrix &X_train, float_vector &y_train){
-
     int n_features = X_train[0].size();
     int n_samples = X_train.size();
 
+    omp_set_num_threads(num_trees);
+
+    #pragma omp parallel for 
     for (int i = 0; i < num_trees; i++)
     {
         //sortear x valores do treino
@@ -72,7 +73,6 @@ void randomForest::train(float_matrix &X_train, float_vector &y_train){
 }
 
 float_vector randomForest::predict(float_matrix& X_test){
-
     vector<float_vector> predictions_global;
     float_vector predictions;
     for (size_t i = 0; i < forest.size(); i++)
@@ -93,12 +93,9 @@ float_vector randomForest::predict(float_matrix& X_test){
     }
     
     return predictions;
-    
-    
 }
 
 float randomForest::evaluate(float_vector& predictions){
-
     map<float, int> predictions_map;
     for (size_t i = 0; i < predictions.size(); i++)
     {

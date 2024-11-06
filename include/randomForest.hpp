@@ -1,8 +1,5 @@
 #include "cart.hpp"
 
-
-
-
 class randomForest
 {
 private:
