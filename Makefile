@@ -26,6 +26,8 @@ all: build
 
 build: $(BIN_DIR) $(OBJ_DIR) $(TARGET)
 
+re: clean all
+
 $(TARGET): $(OBJS)
 	@ $(CXX) $(CXXFLAGS) -o $@ $^
 
@@ -55,4 +57,4 @@ run: clean_all build clean_obj
 exec:
 	@ $(MAKE) run CSV_PATH=$(CSV)
 
-.PHONY: all build clean_obj clean_bin clean_all run exec
+.PHONY: all build clean_obj clean_bin clean_all run exec re
