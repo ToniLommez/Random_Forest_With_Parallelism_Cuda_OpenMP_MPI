@@ -19,5 +19,10 @@ public:
     ~randomForest();
 
     void train(float_matrix &X_train, float_vector &y_train);
+
+    void train_omp(float_matrix &X_train, float_vector &y_train);
+
+    void train_mpi(float_matrix &X_train, float_vector &y_train);
+
     float_vector predict(float_matrix& X_test);
 };

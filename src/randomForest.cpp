@@ -3,28 +3,15 @@
 #include <random>
 #include <map>
 
+#ifdef ENABLE_MPI
+#include <mpi.h>
+#include <omp.h>
+#endif
+
 #ifdef OMP
 #include <omp.h>
 #endif
 
-/*
-
-1. pegar parte treino
-2. n = numero de arvores
-3. para cada n{
-    3.1. subconjunto = sortear x valores do treino e colocar para treino em uma árvore
-                       e features
-    3.2. para cada subconjunto criar uma árvore(PARALELIZAR)
-    
-    }
-
-PREDIÇÃO
-1. pega o dado e passa para todas as árvores simultaneamente
-
-
-cada árvore, guardar as features utilizadas
-
-*/
 
 randomForest::randomForest(int n)
 {
@@ -34,17 +21,13 @@ randomForest::randomForest(int n)
 
 randomForest::~randomForest()
 {
+
 }
 
 void randomForest::train(float_matrix &X_train, float_vector &y_train){
     int n_features = X_train[0].size();
     int n_samples = X_train.size();
 
-    #ifdef OMP
-    omp_set_num_threads(num_trees);
-
-    #pragma omp parallel for schedule(dynamic)
-    #endif
     for (int i = 0; i < num_trees; i++)
     {
         //sortear x valores do treino
@@ -76,6 +59,102 @@ void randomForest::train(float_matrix &X_train, float_vector &y_train){
     }
 
 }
+
+#ifdef OMP
+void randomForest::train_omp(float_matrix &X_train, float_vector &y_train){
+    int n_features = X_train[0].size();
+    int n_samples = X_train.size();
+    
+    omp_set_num_threads(num_trees);
+
+    #pragma omp parallel for schedule(dynamic)
+
+    for (int i = 0; i < num_trees; i++)
+    {
+        //sortear x valores do treino
+        vector<int> random_indexes;
+        for (int j = 0; j < n_samples; j++)
+        {
+            random_indexes.push_back(j);
+        }
+        shuffle(random_indexes.begin(), random_indexes.end(), default_random_engine(random_device{}()));
+
+        std::random_device rd;                                   // Usado para gerar uma semente
+        std::mt19937 generator(rd());                            // Gerador de Mersenne Twister
+        std::uniform_int_distribution<int> distribution(1, 100); // Intervalo de 1 a 100
+
+        // Gerar um número aleatório
+        int samples_used = distribution(generator);
+
+        //pegar parte do treino
+        float_matrix X_train_sub;
+        float_vector y_train_sub;
+        for (int j = 0; j < samples_used; j++)
+        {
+            X_train_sub.push_back(X_train[random_indexes[j]]);
+            y_train_sub.push_back(y_train[random_indexes[j]]);
+        }
+
+        //treinar a árvore
+        forest[i].cart.fit(X_train_sub, y_train_sub);
+    }
+
+}
+#endif
+
+#ifdef ENABLE_MPI
+void randomForest::train_mpi(float_matrix &X_train, float_vector &y_train){
+    int n_features = X_train[0].size();
+    int n_samples = X_train.size();
+    int rank, size;
+
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Definir o número de threads OpenMP
+    int num_threads = 4; // Defina o número desejado de threads
+    omp_set_num_threads(num_threads);
+
+    // Dividir o número de árvores entre os processos MPI
+    int trees_per_process = num_trees / size;
+    int start_tree = rank * trees_per_process;
+    int end_tree = (rank == size - 1) ? num_trees : start_tree + trees_per_process;
+
+    #pragma omp parallel for
+    for (int i = start_tree; i < end_tree; i++)
+    {
+        //sortear x valores do treino
+        vector<int> random_indexes;
+        for (int j = 0; j < n_samples; j++)
+        {
+            random_indexes.push_back(j);
+        }
+        shuffle(random_indexes.begin(), random_indexes.end(), default_random_engine(random_device{}()));
+
+        std::random_device rd;                                   // Usado para gerar uma semente
+        std::mt19937 generator(rd());                            // Gerador de Mersenne Twister
+        std::uniform_int_distribution<int> distribution(1, 100); // Intervalo de 1 a 100
+
+        // Gerar um número aleatório
+        int samples_used = distribution(generator);
+
+        //pegar parte do treino
+        float_matrix X_train_sub;
+        float_vector y_train_sub;
+        for (int j = 0; j < samples_used; j++)
+        {
+            X_train_sub.push_back(X_train[random_indexes[j]]);
+            y_train_sub.push_back(y_train[random_indexes[j]]);
+        }
+
+        //treinar a árvore
+        forest[i].cart.fit(X_train_sub, y_train_sub);
+    }
+
+
+}
+#endif
 
 float_vector randomForest::predict(float_matrix& X_test){
     vector<float_vector> predictions_global;
