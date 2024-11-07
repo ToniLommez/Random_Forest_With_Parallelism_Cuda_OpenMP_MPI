@@ -2,27 +2,12 @@
 #include <chrono>
 #include <random>
 #include "include/utils.hpp"
-#include "include/randomForest.hpp"
+#include "include/cart.hpp"
 #include "include/reader.hpp"
-
-#ifdef ENABLE_MPI
-#include <mpi.h>
-#endif
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    #ifdef ENABLE_MPI
-    int provided;
-    // Inicializa o ambiente MPI
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
-    if (provided < MPI_THREAD_FUNNELED) {
-        printf("Nível de suporte a threads insuficiente\n");
-        MPI_Abort(MPI_COMM_WORLD, 1);
-    }
-    #endif
-    
-    
     // Verificar se o caminho para o CSV foi fornecido como argumento
     if (argc < 2) {
         cerr << "Uso: " << argv[0] << " -csv <caminho_para_csv>" << endl;
@@ -65,27 +50,15 @@ int main(int argc, char* argv[]) {
     trainTestSplit(X, y, X_train, y_train, X_test, y_test, distribution(rng), 0.3f);
 
     // Criar e Treinar a Árvore
-    randomForest rf(100);
-    rf.train(X_train, y_train);
-
-    #ifdef OMP
-    rf.train_omp(X_train, y_train);
-    #endif
-    
-    #ifdef ENABLE_MPI
-    rf.train_mpi(X_train, y_train);
-    #endif
+    Cart cart;
+    cart.fit(X_train, y_train);
 
     // Fazer predições no conjunto de teste
-    float_vector y_pred = rf.predict(X_test);
+    float_vector y_pred = cart.predict(X_test);
 
     // Calcular a Acurácia
     float accuracy = calculateAccuracy(y_test, y_pred);
     cout << "Acuracia: " << accuracy * 100 << "%" << endl;
-    
-    #ifdef ENABLE_MPI
-    // Finaliza o ambiente MPI
-    MPI_Finalize();
-    #endif
+
     return 0;
 }

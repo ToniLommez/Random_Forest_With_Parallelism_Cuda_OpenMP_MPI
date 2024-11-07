@@ -3,7 +3,7 @@
 #include <limits>
 #include <numeric>
 #include <unordered_map>
-#include <iostream>
+#include <omp.h>
 
 using namespace std;
 
@@ -40,6 +40,7 @@ Node *Cart::split_node(const float_matrix &X, const float_vector &y, const int d
 
     // Best division
     auto [feature, threshold] = best_threshold(X, y);
+
     // Divide data
     auto [X_left, y_left, X_right, y_right] = divide(X, y, feature, threshold);
 
@@ -85,7 +86,6 @@ pair<int, float> Cart::best_threshold(const float_matrix &X, const float_vector 
     float best_threshold = 0;
     float lowest_impurity = numeric_limits<float>::max();
 
-    // For every feature find the best threshold
     for (size_t feature = 0; feature < X[0].size(); ++feature) {
         for (const auto &samples : X) {
             float threshold = samples[feature];
@@ -107,6 +107,11 @@ pair<int, float> Cart::best_threshold(const float_matrix &X, const float_vector 
     }
     return {best_feature, best_threshold};
 }
+
+    #ifdef OMP
+    omp_set_num_threads(8);
+    #pragma omp parallel for schedule(dynamic)
+    #endif
 
 tuple<float_matrix, float_vector, float_matrix, float_vector> Cart::divide(const float_matrix &X, const float_vector &y, int feature, float threshold) {
     float_matrix X_left, X_right;
@@ -165,4 +170,3 @@ float Cart::predict_single(const std::vector<float>& sample, Node* node) {
         return predict_single(sample, node->right);
     }
 }
-
