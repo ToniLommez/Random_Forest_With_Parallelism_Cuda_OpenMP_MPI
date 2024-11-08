@@ -4,6 +4,15 @@
 #include <numeric>
 #include <unordered_map>
 
+#if defined(OMP) || defined(ENABLE_MPI)
+#include <omp.h>
+#endif
+
+#ifdef ENABLE_MPI
+#include <mpi.h>
+#endif
+
+
 using namespace std;
 
 Cart::Cart() {
@@ -85,10 +94,12 @@ pair<int, float> Cart::best_threshold(const float_matrix &X, const float_vector 
     float best_threshold = 0;
     float lowest_impurity = numeric_limits<float>::max();
 
-    // For every feature find the best threshold
+    #if defined(OMP) || defined(ENABLE_MPI)
+    #pragma omp parallel for schedule(dynamic)
+    #endif
     for (size_t feature = 0; feature < X[0].size(); ++feature) {
-        for (const auto &samples : X) {
-            float threshold = samples[feature];
+        for (size_t i = 0; i < X.size(); ++i) {
+            float threshold = X[i][feature];
 
             auto [X_left, y_left, X_right, y_right] = divide(X, y, feature, threshold);
 
@@ -97,12 +108,25 @@ pair<int, float> Cart::best_threshold(const float_matrix &X, const float_vector 
             float gini_right = gini(y_right);
             float weighted_impurity = (y_left.size() * gini_left + y_right.size() * gini_right) / y.size();
 
+            // Critical section to update shared variables
+            #if defined(OMP) || defined(ENABLE_MPI)
+            #pragma omp critical
+            {
+                // is it the lowest impurity?
+                if (weighted_impurity < lowest_impurity) {
+                    lowest_impurity = weighted_impurity;
+                    best_feature = feature;
+                    best_threshold = threshold;
+                }
+            }
+            #else
             // is it the lowest impurity?
             if (weighted_impurity < lowest_impurity) {
                 lowest_impurity = weighted_impurity;
                 best_feature = feature;
                 best_threshold = threshold;
             }
+            #endif
         }
     }
     return {best_feature, best_threshold};
@@ -152,7 +176,6 @@ float_vector Cart::predict(const float_matrix& X_test) {
 
     return predictions;
 }
-
 
 float Cart::predict_single(const std::vector<float>& sample, Node* node) {
     if (node->is_leaf) {
