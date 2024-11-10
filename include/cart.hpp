@@ -15,7 +15,7 @@ class Cart {
     ~Cart();
 
     void fit(float_matrix &X_train, float_vector &y_train);
-    float_vector predict(const float_matrix &X_test);
+    float_vector predict(float_matrix &X_test);
 
   private:
     Node *root;
