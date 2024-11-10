@@ -2,7 +2,8 @@ OS := $(shell uname)
 CXX = g++
 CXXFLAGS = -std=c++17 -Iinclude -Wall -Wextra \
            -Wno-unused-variable -Wno-unused-parameter \
-           -Wno-unused-private-field
+           -Wno-unused-private-field \
+		   -Wno-cast-function-type
 SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build/bin
@@ -70,7 +71,7 @@ run: build
 	@$(TARGET) -csv $(CSV_PATH)
 
 run_mpi: build
-	@mpirun -np $(NoP)  $(TARGET) -csv $(CSV_PATH)
+	@mpirun -np $(NoP) $(TARGET) -csv $(CSV_PATH)
 
 exec:
 	@$(MAKE) run CSV_PATH=$(CSV)
