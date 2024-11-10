@@ -1,5 +1,6 @@
 #include "../include/node.hpp"
 #include "../include/utils.hpp"
+#include <cstring>
 
 using namespace std;
 
