@@ -18,11 +18,9 @@ void trainTestSplit(const float_matrix& X, const float_vector& y,
 
 float calculateAccuracy(const float_vector& y_true, const float_vector& y_pred);
 
-#ifdef ENABLE_MPI
-void serialize_vector(vector<char>& buf, vector<float>& vec);
-void serialize_matrix(vector<char>& buf, vector<vector<float>>& vec);
-void deserialize_vector(vector<char>& buf, vector<float>& vec, size_t& idx);
-void deserialize_matrix(vector<char>& buf, vector<vector<float>>& vec, size_t& idx);
-#endif
+// void serialize_vector(vector<char>& buf, vector<float>& vec);
+// void serialize_matrix(vector<char>& buf, vector<vector<float>>& vec);
+// void deserialize_vector(vector<char>& buf, vector<float>& vec, size_t& idx);
+// void deserialize_matrix(vector<char>& buf, vector<vector<float>>& vec, size_t& idx);
 
 #endif

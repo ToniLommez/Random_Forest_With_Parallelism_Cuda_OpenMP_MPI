@@ -24,12 +24,6 @@ class Random_Forest {
     Cart* root;
     vector<Cart*> trees;
 
-#ifdef ENABLE_MPI
-    float_cube trees_X_train;
-    float_matrix trees_y_train;
-    float_matrix trees_preds;
-#endif
-
     pair<float_matrix, float_vector> bootstrap_sample(const float_matrix &X, const float_vector &y);
 };
 

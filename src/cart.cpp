@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <cstring>
 
-#if defined(OMP) || defined(ENABLE_MPI)
+#ifdef OMP
 #include <omp.h>
 #endif
 
@@ -88,9 +88,8 @@ pair<int, float> Cart::best_threshold(const float_matrix &X, const float_vector 
     float lowest_impurity = numeric_limits<float>::max();
 
     // For every feature find the best threshold
-
-#if defined(OMP) || defined(ENABLE_MPI)
-    omp_set_num_threads(4); //setta entre 1,2,4,8
+#ifdef OMP
+    omp_set_num_threads(4);
     #pragma omp parallel for schedule(dynamic)
 #endif
     for (size_t feature = 0; feature < X[0].size(); ++feature) {
@@ -106,20 +105,16 @@ pair<int, float> Cart::best_threshold(const float_matrix &X, const float_vector 
 
             // is it the lowest impurity?
 
-#if defined(OMP) || defined(ENABLE_MPI)
-#pragma omp critical
+#ifdef OMP
+            #pragma omp critical
             {
+#endif
                 if (weighted_impurity < lowest_impurity) {
                     lowest_impurity = weighted_impurity;
                     best_feature = feature;
                     best_threshold = threshold;
                 }
-            }
-#else
-            if (weighted_impurity < lowest_impurity) {
-                lowest_impurity = weighted_impurity;
-                best_feature = feature;
-                best_threshold = threshold;
+#ifdef OMP
             }
 #endif
         }
