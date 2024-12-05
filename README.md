@@ -1,7 +1,5 @@
 # Random_Forest_With_Parallelism_OpenMP_MPI
-Implementation of a Random Forest Algorithm based on CART, optimized with OpenMP and MPI for parallel and distributed computing
-
-[Vídeo da apresentação](https://youtu.be/BZNAmPnop78)
+Implementation of a Random Forest Algorithm based on CART, optimized with OpenMP and CUDA for gpu parallel computing
 
 # Execution options
 
@@ -13,7 +11,7 @@ Execução para sequencial:
 
 -> ex: make && make exec CSV=datasets/iris.csv
 
-execução para Paralelo com OPENMP(a quantidade de threads deve ser trocando manualmente na linha de código x da classe Cart do arquivo cart.cpp):
+execução para Paralelo com OPENMP (a quantidade de threads deve ser alterada manualmente no arquivo RandomForest.cpp):
 |             Comando de execução          |            descrição do que será feito           |
 |------------------------------------------|--------------------------------------------------|
 |                   make omp               | compila o programa com g++ e com a flag -fopenmp |
@@ -21,11 +19,11 @@ execução para Paralelo com OPENMP(a quantidade de threads deve ser trocando ma
 
 -> ex: make omp && make exec CSV=datasets/iris.csv
 
-execução para Paralelo com OPENMP(a quantidade de threads deve ser trocando manualmente na linha de código x da classe Cart do arquivo cart.cpp) e MPI:
+execução para Paralelo com CUDA (a quantidade de threads por block deve ser alterada manualmente no arquivo tree.cu):
 
-|                                Comando de execução                               |             descrição do que será feito          |
-|----------------------------------------------------------------------------------|--------------------------------------------------|
-|                                      make mpi                                    | compila o programa com mpic++ e a flag -fopenmp  |
-| make exec CSV=caminho/para/o/arquivo/csv NP = qunatidade_De_Processos_Para_o_MPI |      executa o programa para MPI com mpirun      |
+|              Comando de execução              |             descrição do que será feito          |
+|-----------------------------------------------|--------------------------------------------------|
+|                  make cuda                    |            compila o programa com nvcc           |
+| make exec_cuda CSV=caminho/para/o/arquivo/csv |                 executa o programa               |
 
--> ex: make mpi && make exec_mpi CSV=datasets/iris.csv NP=4
+-> ex: make cuda && make exec_cuda CSV=datasets/iris.csv
