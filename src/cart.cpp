@@ -4,9 +4,14 @@
 #include <numeric>
 #include <unordered_map>
 #include <cstring>
+#include <iostream>
 
 #ifdef OMP
 #include <omp.h>
+#endif
+
+#ifdef CUDA
+#include "../include/tree.hpp"
 #endif
 
 using namespace std;
@@ -87,9 +92,13 @@ pair<int, float> Cart::best_threshold(const float_matrix &X, const float_vector 
     float best_threshold = 0;
     float lowest_impurity = numeric_limits<float>::max();
 
+#ifdef CUDA
+    // std::cout << "X[0].size(): " << X[0].size() << std::endl;
+    cuda_best_threshold_sender(X, y, X.size(), X[0].size(), &best_feature, &best_threshold);
+#else
     // For every feature find the best threshold
 #ifdef OMP
-    omp_set_num_threads(4);
+    omp_set_num_threads(64);
     #pragma omp parallel for schedule(dynamic)
 #endif
     for (size_t feature = 0; feature < X[0].size(); ++feature) {
@@ -119,6 +128,7 @@ pair<int, float> Cart::best_threshold(const float_matrix &X, const float_vector 
 #endif
         }
     }
+#endif
     return {best_feature, best_threshold};
 }
 

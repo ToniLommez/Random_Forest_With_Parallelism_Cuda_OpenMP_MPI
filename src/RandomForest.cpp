@@ -106,7 +106,7 @@ pair<float_matrix, float_vector> Random_Forest::bootstrap_sample(const float_mat
 // Train
 void Random_Forest::fit(float_matrix &X_train, float_vector &y_train) {
 #ifdef OMP
-#pragma omp target teams distribute parallel for num_teams(2)
+    #pragma omp target teams distribute parallel for num_teams(8) schedule(dynamic)
 #endif
     for (Cart* tree : trees) {
         auto [X_sample, y_sample] = bootstrap_sample(X_train, y_train);

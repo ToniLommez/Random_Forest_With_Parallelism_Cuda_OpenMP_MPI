@@ -1,8 +1,8 @@
 #ifndef _TREE_HPP_
 #define _TREE_HPP_
 
-#include "RandomForest.hpp"
+#include "utils.hpp"
 
-void cuda_init_trees(Cart** h_trees, int n_trees, int max_depth, int min_samples_split, bool isClassification);
+void cuda_best_threshold_sender(const float_matrix &X, const float_vector &y, int num_samples, int num_features, int* best_feature, float* best_threshold);
 
 #endif

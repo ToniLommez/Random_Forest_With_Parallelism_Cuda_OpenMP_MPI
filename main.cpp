@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     trainTestSplit(X, y, X_train, y_train, X_test, y_test, distribution(rng), 0.3f);
 
     // Criar e Treinar a Árvore
-    Random_Forest rf(10, 15, 2, true);
+    Random_Forest rf(10, 5, 2, true);
     rf.fit(X_train, y_train);
     
     // Fazer predições no conjunto de teste

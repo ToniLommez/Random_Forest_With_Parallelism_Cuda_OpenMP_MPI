@@ -4,8 +4,8 @@ CUDA = nvcc
 CXXFLAGS = -std=c++17 -Iinclude -Wall -Wextra \
            -Wno-unused-variable -Wno-unused-parameter \
            -Wno-unused-private-field \
-		   -Wno-cast-function-type
-CUDAFLAGS = -std=c++17 -Iinclude -arch=sm_60 -DCUDA
+           -Wno-cast-function-type
+CUDAFLAGS = -std=c++17 -Iinclude -arch=sm_60
 SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build/bin
@@ -18,7 +18,7 @@ ifeq ($(MAKECMDGOALS), omp)
 endif
 
 ifeq ($(MAKECMDGOALS), cuda)
-	CXXFLAGS += -DCUDA
+    CXXFLAGS += -DCUDA
 endif
 
 # Source files and object files
@@ -49,41 +49,46 @@ build: $(BIN_DIR) $(OBJ_DIR) $(TARGET)
 
 # Original target: compile and link C++ files only
 $(TARGET): $(CPP_OBJS)
-	@$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 # CUDA-specific target: compile and link C++ and CUDA files
 $(CUDA_TARGET): $(CPP_OBJS) $(CUDA_OBJS)
-	@$(CUDA) $(CUDAFLAGS) -o $@ $^
+	$(CUDA) $(CUDAFLAGS) $^ -o $@
 
 # Compile C++ source files into object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Compile CUDA source files into object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cu | $(OBJ_DIR)
-	@$(CUDA) $(CUDAFLAGS) -c $< -o $@
+	$(CUDA) $(CUDAFLAGS) -c $< -o $@
 
 $(BIN_DIR):
-	@$(MKDIR) $(BIN_DIR)
+	$(MKDIR) $(BIN_DIR)
 
 $(OBJ_DIR):
-	@$(MKDIR) $(OBJ_DIR)
+	$(MKDIR) $(OBJ_DIR)
 
 clean_obj:
-	@$(RM) $(OBJ_DIR)/*
+	$(RM) $(OBJ_DIR)/*
 
 clean_bin:
-	@$(RM) $(BIN_DIR)/*
+	$(RM) $(BIN_DIR)/*
 
 clean: clean_obj clean_bin
 
-run: build
-	@$(TARGET) -csv $(CSV_PATH)
+run: 
+	@$(if $(filter cuda,$(MAKECMDGOALS)), \
+		$(CUDA_TARGET) -csv $(CSV_PATH), \
+		$(TARGET) -csv $(CSV_PATH))
 
 exec:
-	@$(MAKE) run CSV_PATH=$(CSV)
+	$(MAKE) run CSV_PATH=$(CSV)
+	
+exec_cuda:
+	$(CUDA_TARGET) -csv $(CSV)
 
-cuda: clean $(CUDA_TARGET)
+cuda: clean $(CPP_OBJS) $(CUDA_OBJS)
+	$(CUDA) $(CUDAFLAGS) $(CPP_OBJS) $(CUDA_OBJS) -o $(CUDA_TARGET)
 
 .PHONY: all build clean_obj clean_bin clean run exec re omp cuda
-
